@@ -1,35 +1,40 @@
 function CloseLoopHoloRequest();
 clc; clear; close all force;
 
-[Setup ] = function_loadparameters(2);
+%removes everything from path
+rmpath(genpath(['C:\Users\SLM\Documents\MATLAB\']));
+rmpath(genpath(['C:\Users\SLM\Desktop\SLM_Management\']));
+addpath(genpath('C:\Users\SLM\Documents\MATLAB\msocket\'));
+addpath(genpath('C:\Users\SLM\Documents\GitHub\SLM-Managment\'));
+addpath(genpath('C:\Users\SLM\Desktop\SLM_Management\SLM_Code\'));
+addpath(genpath('C:\Users\SLM\Desktop\SLM_Management\NOVOCGH_Code\'));
+addpath(genpath('C:\Users\SLM\Desktop\SLM_Management\Calib_Data\'));
+%disp establishing write protocol to master
+disp('done pathing')
 
+disp('Waiting for msocket communication')
+%then wait for a handshake
 
-% get directory
-A=dir('Y:\holography\FrankenRig\HoloRequest\');
-for k = 1:numel(A);
-    if strcmp('HoloRequest.mat',A(k).name);
-        HRidx=k;  %find the index for the directory that equals holorequest
-    end
+MasterIP = '128.32.177.217';
+masterSocket = msconnect(MasterIP,3002);
+
+invar = [];
+
+while ~strcmp(invar,'A');
+invar = msrecv(masterSocket,.5);
 end;
+sendVar = 'B';
+mssend(masterSocket, sendVar);
+disp('communication from Master To Holo Established');
 
-%date stamp for while create data
-createNum = A(HRidx).date;
+x = 1;     HRin = []; 
 
-x = 1;
 while x>0
-    
-    A=dir('Y:\holography\FrankenRig\HoloRequest\');
-    STRTEST = strmatch(createNum,A(HRidx).date);
-    if ~isempty(STRTEST);
-        newFile = 0;
-    else
-        newFile = 1;
-        createNum = A(HRidx).date;
-    end
-    
-    if newFile
+    HRin = msrecv(masterSocket);
+
+    if ~isempty(HRin);
         disp('new File Detected - running HoloRequest')
-        run('RUNME_04_LISTENER_ForHolorequest_alanOnly_2');
+        function_HR_listener(HRin,masterSocket);
     end
     
 end
