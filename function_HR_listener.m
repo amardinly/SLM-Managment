@@ -3,7 +3,7 @@ persistent Setup COC Points;
 
 %configure SLM first run
 if isempty(Setup);
-[Setup ] = function_loadparameters(2);
+[Setup ] = function_loadparameters();
 %assign setup in base for teardown 
 assignin('base','Setup', Setup);
 load([Setup.Datapath '\07_XYZ_Calibration.mat']);  %load calibration params
