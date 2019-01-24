@@ -1,4 +1,4 @@
-function function_HR_listener(holoRequest,masterSocket);
+function function_HR_listener_multiensemble(holoRequest,masterSocket);
 persistent Setup COC Points;
 
 %configure SLM first run
@@ -15,9 +15,7 @@ Setup.CGHMethod=1;
 cycleiterations =1; % Change this number to repeat the sequence N times instead of just once
 %Overwrite delay duration
 Setup.TimeToPickSequence = 0.02;    %second window to select sequence ID
-%just don't use timeout and just post the hologram as soon as you're told
-%to.
-%Setup.SLM.timeout_ms = 200000;     %No more than 2000 ms until time out
+Setup.SLM.timeout_ms = 2000;     %No more than 2000 ms until time out
 calibID =1;                     % Select the calibration ID (z1=1 but does not exist, Z1.5=2, Z1 sutter =3);
 %
     LN = size(holoRequest.targets,1);
@@ -76,13 +74,13 @@ for i = 1:LSequences
 end
 
 %%
-%[Setup.SLM ] = Function_Stop_SLM( Setup.SLM );
-%Setup.SLM.wait_For_Trigger= 1;
-%[ Setup.SLM ] = Function_Start_SLM( Setup.SLM );
-%assogm setup in base for teardown 
-assignin('base','Setup', Setup);
+%assogm setup in base for teardown
+[Setup.SLM ] = Function_Start_SLM( Setup.SLM );
+disp('started up SLM');
+Setup.SLM.wait_For_Trigger = 1;
+%assignin('base','Setup', Setup);
 %Function_shoot_sequences_due_CloseLoop(Setup,sequences,cycleiterations, masterSocket);
-shootSequences(Setup, sequences, masterSocket);
+shootSequencesMultiEnsemble(Setup, sequences, masterSocket);
 [Setup.SLM ] = Function_Stop_SLM( Setup.SLM );
 
 disp('Sequence quit, waiting for new holorequest')
